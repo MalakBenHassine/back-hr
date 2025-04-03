@@ -147,18 +147,30 @@ namespace Back_HR.Controllers.OffersManagementControllers
                 return Forbid("You can only view candidates for your own job offers.");
             }
 
-            var applications = await _context.Applications
-                .Where(a => a.JobOfferId == jobOfferId)
-                .Select(a => new
-                {
-                    ApplicationId = a.Id,
-                    CandidatId = a.CandidateId,
-                    a.Cv,
-                    a.ApplicationDate
-                })
-                .ToListAsync();
+            // Join Applications with Candidates to get full candidate details
+            var candidates = await (from application in _context.Applications
+                                    join candidate in _context.Candidates
+                                    on application.CandidateId equals candidate.Id
+                                    where application.JobOfferId == jobOfferId
+                                    select new CandidatDTO
+                                    {
+                                        Id = candidate.Id,
+                                        Firstname = candidate.Firstname,
+                                        Lastname = candidate.Lastname,
+                                        Email = candidate.Email,
+                                        Telephone = candidate.Telephone,
+                                        Competences = candidate.Competences, // Assuming this is a navigation property
+                                        Cv = application.Cv, // Use the CV from the application
+                                        AppliedDate = application.ApplicationDate // Map ApplicationDate to AppliedDate
+                                    })
+                                    .ToListAsync();
 
-            return Ok(applications);
+            if (!candidates.Any())
+            {
+                return Ok(new List<CandidatDTO>()); // Return an empty list if no candidates are found
+            }
+
+            return Ok(candidates);
         }
 
         [HttpDelete("{applicationId}/cancel")]
