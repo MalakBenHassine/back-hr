@@ -78,8 +78,6 @@ namespace Back_HR.Controllers.OffersManagementControllers
             // Ensure the CandidatId matches the authenticated user
             if (dto.CandidatId != candidate.Id)
             {
-                Console.WriteLine(dto.JobOfferId + "*****************************************ya zeby****");
-                Console.WriteLine(dto.ToString + "*****************************************ya zeby****");
                 return Forbid("You can only apply for yourself.");
             }
 
@@ -149,18 +147,77 @@ namespace Back_HR.Controllers.OffersManagementControllers
 
             var applications = await _context.Applications
                 .Where(a => a.JobOfferId == jobOfferId)
+                .Include(a => a.Candidat)
+                    .ThenInclude(c => c.Competences) 
                 .Select(a => new
                 {
                     ApplicationId = a.Id,
-                    CandidatId = a.CandidateId,
-                    a.Cv,
-                    a.ApplicationDate
+                    Candidate = a.Candidat,
+                    CvPath = a.Cv,
+                    Status = a.Status.ToString(),
+                    ApplicationDate = a.ApplicationDate
                 })
                 .ToListAsync();
 
-            return Ok(applications);
-        }
+            var result = applications.Select(app =>
+            {
+                var candidateDto = new CandidatDTO
+                {
+                    Id = app.Candidate.Id,
+                    Lastname = app.Candidate.Lastname,
+                    Firstname = app.Candidate.Firstname,
+                    Telephone = app.Candidate.Telephone,
+                    Email = app.Candidate.Email,
+                    Competences = app.Candidate.Competences 
+                };
 
+                if (string.IsNullOrEmpty(app.CvPath))
+                {
+                    return new ApplicationResponseDto
+                    {
+                        ApplicationId = app.ApplicationId,
+                        Candidate = candidateDto,
+                        ApplicationDate = app.ApplicationDate,
+                        Status = app.Status.ToString(),
+                        CvFile = null
+                    };
+                }
+
+                var cvAbsolutePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", app.CvPath.TrimStart('/'));
+
+                if (!System.IO.File.Exists(cvAbsolutePath))
+                {
+                    return new ApplicationResponseDto
+                    {
+                        ApplicationId = app.ApplicationId,
+                        Candidate = candidateDto,
+                        ApplicationDate = app.ApplicationDate,
+                        CvFile = null,
+                        Status = app.Status.ToString(),
+                        Message = "CV file not found on server."
+                    };
+                }
+
+                var fileBytes = System.IO.File.ReadAllBytes(cvAbsolutePath);
+                var fileName = Path.GetFileName(cvAbsolutePath);
+
+                return new ApplicationResponseDto
+                {
+                    ApplicationId = app.ApplicationId,
+                    Candidate = candidateDto,
+                    ApplicationDate = app.ApplicationDate,
+                    Status = app.Status.ToString(),
+                    CvFile = new CvFileDto
+                    {
+                        FileName = fileName,
+                        Content = Convert.ToBase64String(fileBytes),
+                        ContentType = "application/pdf"
+                    }
+                };
+            }).ToList();
+
+            return Ok(result);
+        }
         [HttpDelete("{applicationId}/cancel")]
         [Authorize(Policy = "CandidatOnly")]
         public async Task<IActionResult> CancelApplication(Guid applicationId)
