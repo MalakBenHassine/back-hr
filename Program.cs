@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Back_HR.Models;
 using Back_HR.Models.enums;
+using Back_HR.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpClient<OllamaService>();
+
 
 // Add services to the container.
 builder.Services.AddControllers()

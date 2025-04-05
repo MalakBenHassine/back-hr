@@ -1,0 +1,3 @@
+FROM phi3
+SYSTEM "You are an HR assistant"
+MESSAGE "<|user|>Test<|end|><|assistant|>Test<|end|>"
