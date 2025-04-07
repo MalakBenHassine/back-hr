@@ -31,7 +31,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
         {
             string json = JsonSerializer.Serialize(dto);
             Console.WriteLine($"Received DTO: {json}");
-            if (!ModelState.IsValid)return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
             string? cvPath = null;
             if (dto.Cv != null && dto.Cv.Length > 0)
             {
@@ -148,7 +148,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
             var applications = await _context.Applications
                 .Where(a => a.JobOfferId == jobOfferId)
                 .Include(a => a.Candidat)
-                    .ThenInclude(c => c.Competences) 
+                    .ThenInclude(c => c.Competences)
                 .Select(a => new
                 {
                     ApplicationId = a.Id,
@@ -168,7 +168,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
                     Firstname = app.Candidate.Firstname,
                     Telephone = app.Candidate.Telephone,
                     Email = app.Candidate.Email,
-                    Competences = app.Candidate.Competences 
+                    Competences = app.Candidate.Competences
                 };
 
                 if (string.IsNullOrEmpty(app.CvPath))
@@ -281,7 +281,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
                 return Forbid("You can only accept applications for your own job offers.");
             }
 
-            application.Status = ApplicationStatus.ACCEPTED; 
+            application.Status = ApplicationStatus.ACCEPTED;
             await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Application accepted successfully", ApplicationId = applicationId });
@@ -320,6 +320,107 @@ namespace Back_HR.Controllers.OffersManagementControllers
             await _context.SaveChangesAsync();
 
             return Ok(new { Message = "Application rejected successfully", ApplicationId = applicationId });
+        }
+
+
+        [HttpGet("my-applications")]
+        [Authorize(Policy = "CandidatOnly")] // Assuming you have a policy for candidates
+        public async Task<IActionResult> GetMyApplications()
+        {
+            // Get the authenticated user's email from JWT token
+            var email = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (string.IsNullOrEmpty(email))
+            {
+                return Unauthorized("Unable to identify user.");
+            }
+
+            // Find the candidate user
+            var candidateUser = await _userManager.FindByEmailAsync(email) as Candidat;
+            if (candidateUser == null)
+            {
+                return Unauthorized("Candidate user not found.");
+            }
+
+            // Retrieve all applications for this candidate
+            var applications = await _context.Applications
+                .Where(a => a.Candidat.Id == candidateUser.Id)
+                .Include(a => a.JobOffer)
+                .Include(a => a.Candidat)
+                    .ThenInclude(c => c.Competences)
+                .Select(a => new
+                {
+                    ApplicationId = a.Id,
+                    JobOffer = a.JobOffer,
+                    CvPath = a.Cv,
+                    Status = a.Status.ToString(),
+                    ApplicationDate = a.ApplicationDate
+                })
+                .ToListAsync();
+
+            // Transform the data into ApplicationResponseDto
+            var result = applications.Select(app =>
+            {
+                // Create JobOffer DTO
+                var jobOfferDto = new JobOfferDtoGet
+                {
+                    Id = app.JobOffer.Id,
+                    Title = app.JobOffer.Title,
+                    Description = app.JobOffer.Description,
+                    Experience = app.JobOffer.Experience,
+                    PublishDate = app.JobOffer.PublishDate,
+                    Salary = app.JobOffer.Salary,
+                    Location = app.JobOffer.Location,
+                    Status = app.JobOffer.Status,
+                    Competences = app.JobOffer.Competences
+                };
+
+                // Handle CV file
+                if (string.IsNullOrEmpty(app.CvPath))
+                {
+                    return new ApplicationResponseDto
+                    {
+                        ApplicationId = app.ApplicationId,
+                        JobOffer = jobOfferDto,
+                        ApplicationDate = app.ApplicationDate,
+                        Status = app.Status,
+                        CvFile = null
+                    };
+                }
+
+                var cvAbsolutePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", app.CvPath.TrimStart('/'));
+
+                if (!System.IO.File.Exists(cvAbsolutePath))
+                {
+                    return new ApplicationResponseDto
+                    {
+                        ApplicationId = app.ApplicationId,
+                        JobOffer = jobOfferDto,
+                        ApplicationDate = app.ApplicationDate,
+                        Status = app.Status,
+                        CvFile = null,
+                        Message = "CV file not found on server."
+                    };
+                }
+
+                var fileBytes = System.IO.File.ReadAllBytes(cvAbsolutePath);
+                var fileName = Path.GetFileName(cvAbsolutePath);
+
+                return new ApplicationResponseDto
+                {
+                    ApplicationId = app.ApplicationId,
+                    JobOffer = jobOfferDto,
+                    ApplicationDate = app.ApplicationDate,
+                    Status = app.Status,
+                    CvFile = new CvFileDto
+                    {
+                        FileName = fileName,
+                        Content = Convert.ToBase64String(fileBytes),
+                        ContentType = "application/pdf"
+                    }
+                };
+            }).ToList();
+
+            return Ok(result);
         }
     }
 }
