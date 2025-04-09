@@ -380,7 +380,6 @@ namespace Back_HR.Controllers.OffersManagementControllers
                     return new ApplicationResponseDto
                     {
                         ApplicationId = app.ApplicationId,
-                        JobOffer = jobOfferDto,
                         ApplicationDate = app.ApplicationDate,
                         Status = app.Status,
                         CvFile = null
@@ -394,7 +393,6 @@ namespace Back_HR.Controllers.OffersManagementControllers
                     return new ApplicationResponseDto
                     {
                         ApplicationId = app.ApplicationId,
-                        JobOffer = jobOfferDto,
                         ApplicationDate = app.ApplicationDate,
                         Status = app.Status,
                         CvFile = null,
@@ -408,7 +406,6 @@ namespace Back_HR.Controllers.OffersManagementControllers
                 return new ApplicationResponseDto
                 {
                     ApplicationId = app.ApplicationId,
-                    JobOffer = jobOfferDto,
                     ApplicationDate = app.ApplicationDate,
                     Status = app.Status,
                     CvFile = new CvFileDto
