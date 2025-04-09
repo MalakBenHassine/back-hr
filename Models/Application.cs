@@ -19,5 +19,7 @@ namespace Back_HR.Models
         public JobOffer JobOffer { get; set; }
 
         public string Cv { get; set; }
+        public double? AdequacyScore { get; set; }
+
     }
 }
