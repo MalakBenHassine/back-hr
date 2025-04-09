@@ -43,6 +43,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter 'Bearer' followed by a space and your JWT token (e.g., 'Bearer eyJhbGciOi...')."
     });
 
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -59,6 +60,7 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.OperationFilter<JsonResponseOperationFilter>();
 });
+
 
 // Add CORS
 builder.Services.AddCors(options =>

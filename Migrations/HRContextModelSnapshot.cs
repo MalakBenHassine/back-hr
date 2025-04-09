@@ -54,6 +54,42 @@ namespace Back_HR.Migrations
                     b.ToTable("Applications");
                 });
 
+            modelBuilder.Entity("Back_HR.Models.Attendance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime?>("CheckInTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CheckOutTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsAbsent")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsLate")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("Attendances");
+                });
+
             modelBuilder.Entity("Back_HR.Models.Competence", b =>
                 {
                     b.Property<Guid>("Id")
@@ -132,6 +168,60 @@ namespace Back_HR.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Back_HR.Models.PerformanceReview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<int>("Absences")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientSatisfactionScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommunicationScore")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("InitiativeScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LateArrivals")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ManagerComment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("OnTimeCompletionRate")
+                        .HasColumnType("float");
+
+                    b.Property<int>("OutputQualityScore")
+                        .HasColumnType("int");
+
+                    b.Property<double>("OverallScore")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ProcessImprovementIdeas")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReviewDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TasksCompleted")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.ToTable("PerformanceReviews");
                 });
 
             modelBuilder.Entity("Back_HR.Models.RevokedToken", b =>
@@ -489,9 +579,33 @@ namespace Back_HR.Migrations
                 {
                     b.HasBaseType("Back_HR.Models.User");
 
+                    b.Property<int>("Absences")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientSatisfactionScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LateArrivals")
+                        .HasColumnType("int");
+
+                    b.Property<double>("OnTimeCompletionRate")
+                        .HasColumnType("float");
+
                     b.Property<string>("Poste")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProcessImprovementIdeas")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TasksCompleted")
+                        .HasColumnType("int");
 
                     b.ToTable("Employees", (string)null);
                 });
@@ -522,6 +636,17 @@ namespace Back_HR.Migrations
                     b.Navigation("JobOffer");
                 });
 
+            modelBuilder.Entity("Back_HR.Models.Attendance", b =>
+                {
+                    b.HasOne("Back_HR.Models.Employe", "Employee")
+                        .WithMany("Attendances")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+                });
+
             modelBuilder.Entity("Back_HR.Models.JobOffer", b =>
                 {
                     b.HasOne("Back_HR.Models.RH", "RHResponsable")
@@ -531,6 +656,17 @@ namespace Back_HR.Migrations
                         .IsRequired();
 
                     b.Navigation("RHResponsable");
+                });
+
+            modelBuilder.Entity("Back_HR.Models.PerformanceReview", b =>
+                {
+                    b.HasOne("Back_HR.Models.Employe", "Employee")
+                        .WithMany("PerformanceReviews")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("Back_HR.Models.SurveyResponse", b =>
@@ -711,6 +847,10 @@ namespace Back_HR.Migrations
 
             modelBuilder.Entity("Back_HR.Models.Employe", b =>
                 {
+                    b.Navigation("Attendances");
+
+                    b.Navigation("PerformanceReviews");
+
                     b.Navigation("SurveyResponses");
                 });
 

@@ -31,7 +31,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
         {
             string json = JsonSerializer.Serialize(dto);
             Console.WriteLine($"Received DTO: {json}");
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)return BadRequest(ModelState);
             string? cvPath = null;
             if (dto.Cv != null && dto.Cv.Length > 0)
             {

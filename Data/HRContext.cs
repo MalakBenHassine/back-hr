@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Back_HR.Controllers.UsersManagementControllers;
 
 namespace Back_HR.Models
 {
@@ -18,6 +19,8 @@ namespace Back_HR.Models
         public DbSet<Competence> Competences { get; set; }
         public DbSet<JobOffer> JobOffers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PerformanceReview> PerformanceReviews { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Survey> Surveys { get; set; }
         public DbSet<SurveyResponse> SurveyResponses { get; set; }
         public DbSet<Application> Applications { get; set; }
@@ -34,6 +37,9 @@ namespace Back_HR.Models
             modelBuilder.Entity<Employe>().ToTable("Employees");
             modelBuilder.Entity<RH>().ToTable("HRs");
 
+            modelBuilder.Entity<PerformanceReview>().Property(p => p.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<Attendance>().Property(a => a.Id).HasDefaultValueSql("NEWID()");
+
             // Configure GUID IDs with default values (NEWID for SQL Server)
             modelBuilder.Entity<User>().Property(u => u.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Candidat>().Property(c => c.Id).HasDefaultValueSql("NEWID()");
@@ -49,6 +55,23 @@ namespace Back_HR.Models
             modelBuilder.Entity<User>()
             .Property(u => u.UserType)
             .HasConversion<int>();
+
+            
+            modelBuilder.Entity<Employe>()
+                .HasMany(e => e.PerformanceReviews)
+                .WithOne(p => p.Employee)
+                .HasForeignKey(p => p.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Attendance>()
+              .HasOne(a => a.Employee)
+              .WithMany(e => e.Attendances)
+              .HasForeignKey(a => a.EmployeeId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+
+           
+
+            // Optional: Seed initial data for testing
 
             // Configure many-to-many between Candidate and Skill
             modelBuilder.Entity<Candidat>()
