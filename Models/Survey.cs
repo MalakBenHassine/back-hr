@@ -1,17 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Back_HR.Models/Survey.cs
+using System;
+using System.Collections.Generic;
 
 namespace Back_HR.Models
 {
     public class Survey
     {
-        [Key]
         public Guid Id { get; set; }
-        public List<string> Questions { get; set; } = new List<string>();
+        public string Title { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public Guid CreatedBy { get; set; }
+        public Guid? CreatorId { get; set; }
+        public User? Creator { get; set; } // Rendre nullable
+        public List<SurveyQuestion> Questions { get; set; }
+        public List<Employe> Employes { get; set; }
+        public List<SurveyResponse> Responses { get; set; }
 
-        // One-to-many with SurveyResponse
-        public List<SurveyResponse> Responses { get; set; } = new List<SurveyResponse>();
-
-        // many-to-many with Employe
-        public List<Employe> Employes { get; set; } = new List<Employe>();
+        public Survey()
+        {
+            Id = Guid.NewGuid();
+            Title = string.Empty;
+            CreatedAt = DateTime.UtcNow;
+            CreatedBy = Guid.Empty;
+            CreatorId = null;
+            Creator = null;
+            Questions = new List<SurveyQuestion>();
+            Employes = new List<Employe>();
+            Responses = new List<SurveyResponse>();
+        }
     }
 }

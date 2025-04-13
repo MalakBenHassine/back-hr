@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Back_HR.Models
 {
@@ -11,7 +13,7 @@ namespace Back_HR.Models
         }
 
         // DbSets for all entities
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet<Candidat> Candidates { get; set; }
         public DbSet<Employe> Employees { get; set; }
         public DbSet<RH> HRs { get; set; }
@@ -19,6 +21,7 @@ namespace Back_HR.Models
         public DbSet<JobOffer> JobOffers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Survey> Surveys { get; set; }
+        public DbSet<SurveyQuestion> SurveyQuestions { get; set; } // Ajout de la nouvelle entité
         public DbSet<SurveyResponse> SurveyResponses { get; set; }
         public DbSet<Application> Applications { get; set; }
         public DbSet<RevokedToken> RevokedTokens { get; set; }
@@ -43,12 +46,13 @@ namespace Back_HR.Models
             modelBuilder.Entity<JobOffer>().Property(j => j.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Notification>().Property(n => n.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Survey>().Property(s => s.Id).HasDefaultValueSql("NEWID()");
+            modelBuilder.Entity<SurveyQuestion>().Property(sq => sq.Id).HasDefaultValueSql("NEWID()"); // Ajout pour SurveyQuestion
             modelBuilder.Entity<SurveyResponse>().Property(sr => sr.Id).HasDefaultValueSql("NEWID()");
             modelBuilder.Entity<Application>().Property(a => a.Id).HasDefaultValueSql("NEWID()");
 
             modelBuilder.Entity<User>()
-            .Property(u => u.UserType)
-            .HasConversion<int>();
+                .Property(u => u.UserType)
+                .HasConversion<int>();
 
             // Configure many-to-many between Candidate and Skill
             modelBuilder.Entity<Candidat>()
@@ -81,6 +85,13 @@ namespace Back_HR.Models
                 .WithMany(e => e.SurveysResponded)
                 .UsingEntity(j => j.ToTable("SurveyEmployees"));
 
+            // Configure one-to-many entre Survey et SurveyQuestion
+            modelBuilder.Entity<Survey>()
+                .HasMany(s => s.Questions)
+                .WithOne(sq => sq.Survey)
+                .HasForeignKey(sq => sq.SurveyId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configure one-to-many between Survey and SurveyResponse
             modelBuilder.Entity<Survey>()
                 .HasMany(s => s.Responses)
@@ -108,6 +119,19 @@ namespace Back_HR.Models
                 .WithOne(a => a.JobOffer)
                 .HasForeignKey(a => a.JobOfferId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Suppression de la conversion JSON pour Survey.Questions (remplacée par SurveyQuestion)
+            // La conversion JSON pour SurveyResponse.Answers reste inchangée
+            modelBuilder.Entity<SurveyResponse>()
+                .Property(sr => sr.Answers)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, new JsonSerializerOptions { WriteIndented = false }),
+                    v => JsonSerializer.Deserialize<List<string>>(v, new JsonSerializerOptions()) ?? new List<string>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                    (c1, c2) => c1 == null || c2 == null ? c1 == c2 : c1.SequenceEqual(c2),
+                    c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())) : 0,
+                    c => c != null ? c.ToList() : new List<string>()));
         }
     }
 }
