@@ -1,19 +1,27 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Back_HR.Models
 {
     public class SurveyResponse
     {
-        [Key]
         public Guid Id { get; set; }
-        public string Response { get; set; } // The employee's response (string)
-
-        // Foreign key to Survey
         public Guid SurveyId { get; set; }
-        public Survey Survey { get; set; }
+        public Survey? Survey { get; set; }
+        public Guid EmployeeId { get; set; } // Renommé de EmployeId à EmployeeId
+        public Employe? Employee { get; set; } // Renommé de Employe à Employee
+        public DateTime SubmittedAt { get; set; }
+        public List<string> Answers { get; set; } // Changé de string à List<string>
 
-        // Foreign key to Employee
-        public Guid EmployeeId { get; set; }
-        public Employe Employee { get; set; }
+        public SurveyResponse()
+        {
+            Id = Guid.NewGuid();
+            SurveyId = Guid.Empty;
+            Survey = null;
+            EmployeeId = Guid.Empty;
+            Employee = null;
+            SubmittedAt = DateTime.UtcNow;
+            Answers = new List<string>();
+        }
     }
 }
