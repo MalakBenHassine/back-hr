@@ -29,6 +29,9 @@ namespace Back_HR.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
+                    b.Property<double?>("AdequacyScore")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("ApplicationDate")
                         .HasColumnType("datetime2");
 
