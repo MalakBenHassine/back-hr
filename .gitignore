@@ -21,6 +21,5 @@ project.assets.json
 *.cache
 
 wwwroot/uploads/
-appsettings.json
 node_modules/
 

@@ -183,7 +183,7 @@ namespace Back_HR.Controllers.OffersManagementControllers
 
             var candidate = await _userManager.FindByEmailAsync(email) as Candidat;
             if (candidate == null) return Unauthorized("Candidate user not found.");
-            if (dto.CandidatId != candidate.Id) return Forbid("You can only apply for yourself.");
+            if (dto.CandidatId != candidate.Id) return BadRequest("You can only apply for yourself.");
 
             var jobOffer = await _context.JobOffers.FirstOrDefaultAsync(jo => jo.Id == dto.JobOfferId);
             if (jobOffer == null) return NotFound($"No job offer found with ID {dto.JobOfferId}.");
