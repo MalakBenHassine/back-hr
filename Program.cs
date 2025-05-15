@@ -11,9 +11,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
+System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient<OllamaService>();
-
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -43,7 +44,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Enter 'Bearer' followed by a space and your JWT token (e.g., 'Bearer eyJhbGciOi...')."
     });
 
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -60,7 +60,6 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.OperationFilter<JsonResponseOperationFilter>();
 });
-
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -86,6 +85,7 @@ builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<HRContext>()
 .AddDefaultTokenProviders();
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -144,7 +144,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RHOnly", policy => policy.RequireClaim("UserType", UserType.RH.ToString()));
-    options.AddPolicy("EmployeOnly", policy => policy.RequireClaim("UserType", UserType.EMPLOYE.ToString()));
+    options.AddPolicy("EmployeeOnly", policy => policy.RequireClaim("UserType", UserType.EMPLOYE.ToString())); // Changé ici
     options.AddPolicy("CandidatOnly", policy => policy.RequireClaim("UserType", UserType.CANDIDAT.ToString()));
 });
 
@@ -188,7 +188,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
 
 // Custom Operation Filter to enforce JSON responses
 public class JsonResponseOperationFilter : IOperationFilter

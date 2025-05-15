@@ -1,5 +1,4 @@
-﻿// Back_HR.Models/Survey.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Back_HR.Models
@@ -10,8 +9,7 @@ namespace Back_HR.Models
         public string Title { get; set; }
         public DateTime CreatedAt { get; set; }
         public Guid CreatedBy { get; set; }
-        public Guid? CreatorId { get; set; }
-        public User? Creator { get; set; } // Rendre nullable
+        public User? Creator { get; set; } // Propriété de navigation, reste nullable
         public List<SurveyQuestion> Questions { get; set; }
         public List<Employe> Employes { get; set; }
         public List<SurveyResponse> Responses { get; set; }
@@ -22,7 +20,6 @@ namespace Back_HR.Models
             Title = string.Empty;
             CreatedAt = DateTime.UtcNow;
             CreatedBy = Guid.Empty;
-            CreatorId = null;
             Creator = null;
             Questions = new List<SurveyQuestion>();
             Employes = new List<Employe>();

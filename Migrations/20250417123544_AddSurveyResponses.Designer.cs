@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Back_HR.Migrations
 {
     [DbContext(typeof(HRContext))]
-    [Migration("20250414200345_BaselineSchema")]
-    partial class BaselineSchema
+    [Migration("20250417123544_AddSurveyResponses")]
+    partial class AddSurveyResponses
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -313,14 +313,17 @@ namespace Back_HR.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<string>("Answers")
+                    b.Property<string>("Answer")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("SubmittedAt")
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("RespondedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("SurveyId")
@@ -329,6 +332,8 @@ namespace Back_HR.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("SurveyId");
 
@@ -630,9 +635,33 @@ namespace Back_HR.Migrations
                 {
                     b.HasBaseType("Back_HR.Models.User");
 
+                    b.Property<int>("Absences")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ClientSatisfactionScore")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Department")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("LateArrivals")
+                        .HasColumnType("int");
+
+                    b.Property<double>("OnTimeCompletionRate")
+                        .HasColumnType("float");
+
                     b.Property<string>("Poste")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProcessImprovementIdeas")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TasksCompleted")
+                        .HasColumnType("int");
 
                     b.ToTable("Employees", (string)null);
                 });
@@ -724,6 +753,12 @@ namespace Back_HR.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Back_HR.Models.SurveyQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Back_HR.Models.Survey", "Survey")
                         .WithMany("Responses")
                         .HasForeignKey("SurveyId")
@@ -731,6 +766,8 @@ namespace Back_HR.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+
+                    b.Navigation("Question");
 
                     b.Navigation("Survey");
                 });

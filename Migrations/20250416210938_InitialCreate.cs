@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Back_HR.Migrations
 {
     /// <inheritdoc />
-    public partial class BaselineSchema : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -204,7 +204,15 @@ namespace Back_HR.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
-                    Poste = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Poste = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Department = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TasksCompleted = table.Column<int>(type: "int", nullable: false),
+                    OnTimeCompletionRate = table.Column<double>(type: "float", nullable: false),
+                    ProcessImprovementIdeas = table.Column<int>(type: "int", nullable: false),
+                    Absences = table.Column<int>(type: "int", nullable: false),
+                    LateArrivals = table.Column<int>(type: "int", nullable: false),
+                    ClientSatisfactionScore = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
