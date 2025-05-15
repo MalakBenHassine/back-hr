@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Back_HR.Migrations
 {
     [DbContext(typeof(HRContext))]
-    [Migration("20250414202310_AddAdequacyScoreToApplications")]
-    partial class AddAdequacyScoreToApplications
+    [Migration("20250423113725_RemoveCreatorIdFromSurvey")]
+    partial class RemoveCreatorIdFromSurvey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -313,14 +313,17 @@ namespace Back_HR.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<string>("Answers")
+                    b.Property<string>("Answer")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("SubmittedAt")
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("RespondedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("SurveyId")
@@ -329,6 +332,8 @@ namespace Back_HR.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("QuestionId");
 
                     b.HasIndex("SurveyId");
 
@@ -748,6 +753,12 @@ namespace Back_HR.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Back_HR.Models.SurveyQuestion", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Back_HR.Models.Survey", "Survey")
                         .WithMany("Responses")
                         .HasForeignKey("SurveyId")
@@ -755,6 +766,8 @@ namespace Back_HR.Migrations
                         .IsRequired();
 
                     b.Navigation("Employee");
+
+                    b.Navigation("Question");
 
                     b.Navigation("Survey");
                 });

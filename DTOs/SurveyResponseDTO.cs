@@ -1,18 +1,20 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace Back_HR.DTOs
+namespace Back_HR.Models.Dtos
 {
-    public class SurveyResponseDTO
+    public class SurveyResponseDto
     {
-        [Required(ErrorMessage = "L'ID du sondage est requis.")]
+        public Guid Id { get; set; }
         public Guid SurveyId { get; set; }
+        public Guid EmployeeId { get; set; } 
+        public string? EmployeeName { get; set; } 
+        public Guid QuestionId { get; set; }
+        public string? Answer { get; set; } 
+        public string? RespondedAt { get; set; } 
+    }
 
-        [Required(ErrorMessage = "L'ID de l'employé est requis.")]
-        public Guid EmployeeId { get; set; }
-
-        [Required(ErrorMessage = "Les réponses sont requises.")]
-        public List<string> Answers { get; set; } = new List<string>();
+    public class SubmitSurveyResponseDto
+    {
+        public Guid SurveyId { get; set; }
+        public Guid QuestionId { get; set; }
+        public string? Answer { get; set; } 
     }
 }

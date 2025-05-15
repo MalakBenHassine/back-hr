@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Back_HR.Migrations
 {
     [DbContext(typeof(HRContext))]
-    [Migration("20250414200534_AddEmployeColumns")]
-    partial class AddEmployeColumns
+    [Migration("20250416210938_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

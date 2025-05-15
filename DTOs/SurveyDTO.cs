@@ -17,7 +17,7 @@ namespace Back_HR.Models.Dtos
             Title = string.Empty;
             CreatedAt = string.Empty;
             CreatedBy = string.Empty;
-            CreatorName = string.Empty; // Initialisation pour éviter CS8618
+            CreatorName = string.Empty; // Correction : suppression du `=`
             Questions = new List<SurveyQuestionDto>();
         }
     }
