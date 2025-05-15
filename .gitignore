@@ -23,3 +23,7 @@ project.assets.json
 wwwroot/uploads/
 node_modules/
 
+
+# Configuration files
+appsettings*.json
+
